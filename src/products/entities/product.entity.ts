@@ -1,18 +1,18 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text', { unique: true, nullable: false })
+  @Column('text', { unique: true })
   title: string;
 
-  @Column('numeric', { default: 0 })
+  @Column('float', { default: 0 })
   // @Column('decimal', { precision: 5, scale: 3 })
   price: number;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   description: string;
 
   // slug para url friendly
@@ -27,4 +27,15 @@ export class Product {
 
   @Column('text')
   gender: string;
+
+  @BeforeInsert()
+  checkSlugInsert() {
+    if (!this.slug) this.slug = this.title;
+
+    this.slug = this.slug
+      .toLowerCase()
+      .trim()
+      .replaceAll(' ', '_')
+      .replaceAll("'", '');
+  }
 }
