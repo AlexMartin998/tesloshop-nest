@@ -8,18 +8,18 @@ export class Product {
   @Column('text', { unique: true, nullable: false })
   title: string;
 
-  @Column('numeric', { nullable: false, default: 0 })
+  @Column('numeric', { default: 0 })
   // @Column('decimal', { precision: 5, scale: 3 })
   price: number;
 
-  @Column('text', { nullable: true })
+  @Column('text')
   description: string;
 
   // slug para url friendly
-  @Column('text', { unique: true, nullable: false })
+  @Column('text', { unique: true })
   slug: string;
 
-  @Column('int', { nullable: false, default: 0 })
+  @Column('int', { default: 0 })
   stock: number;
 
   @Column('text', { array: true })
