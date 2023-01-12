@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -12,9 +13,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       database: process.env.DB_NAME,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
+
       autoLoadEntities: true, //cree en auto las entities
-      synchronize: true, // solo en Dev - actua ante un cambio - prod: false
+      synchronize: true, // solo en Dev - actua ante un cambio en las entities - prod: false
     }),
+    ProductsModule,
   ],
   controllers: [],
   providers: [],
