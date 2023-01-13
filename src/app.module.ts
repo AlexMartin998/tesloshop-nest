@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductsModule } from './products/products.module';
 import { CommonModule } from './common/common.module';
+import { EnvConfiguration } from './config/app.config';
+import { FilesModule } from './files/files.module';
+import { ProductsModule } from './products/products.module';
 import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      load: [EnvConfiguration],
+
+      // // Con esto evitamos tener q importar el 'ConfigModule' en c/module q utilize EnvV
+      // isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -22,6 +29,7 @@ import { SeedModule } from './seed/seed.module';
     ProductsModule,
     CommonModule,
     SeedModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],
