@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   MinLength,
 } from 'class-validator';
 
@@ -25,6 +26,7 @@ export class CreateProductDto {
 
   @IsString()
   @IsOptional()
+  // @Matches(/^[\w-]+$/, { message: 'Slug format is incorrect' })
   slug?: string;
 
   @IsInt()
