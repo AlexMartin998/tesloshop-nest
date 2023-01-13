@@ -10,6 +10,8 @@ export class ProductImage {
   url: string;
 
   // // Relaciones: Muchas imgs pueden pertenecer a 1 Product  -- Se crea en esta tabla
-  @ManyToOne(() => Product, (product) => product.images)
+  @ManyToOne(() => Product, (product) => product.images, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
 }

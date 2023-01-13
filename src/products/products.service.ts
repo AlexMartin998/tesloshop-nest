@@ -177,4 +177,20 @@ export class ProductsService {
       'Unexpected error, check serve logs',
     );
   }
+
+  // para los seeds
+  async deleteAllProducts() {
+    if (process.env.NODE_ENV !== 'dev')
+      throw new BadRequestException(
+        'This action can only be executed in dev mode',
+      );
+
+    const query = this.productRepository.createQueryBuilder('product');
+
+    try {
+      return await query.delete().where({}).execute();
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
+  }
 }
