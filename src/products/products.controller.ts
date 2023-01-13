@@ -38,6 +38,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,

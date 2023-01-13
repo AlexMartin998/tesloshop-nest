@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -23,6 +23,9 @@ export class ProductsService {
 
     @InjectRepository(ProductImage)
     private readonly productImageRepository: Repository<ProductImage>,
+
+    // query runner
+    private readonly dataSource: DataSource,
   ) {}
 
   // TODO: crear imgs basado en el id como en SQL: https://www.udemy.com/course/nest-framework/learn/lecture/33068696#questions/18840882
@@ -58,17 +61,15 @@ export class ProductsService {
       },
     });
 
-    return products;
-
-    // // ya no es necesaria x @Transform - @UseInterceptors(ClassSerializerInterceptor)
     // return products.map(({ images, ...rest }) => ({
     //   ...rest,
     //   images: images.map((img) => img.url),
     // }));
-    // return products.reduce((acc, { images, ...rest }) => {
-    //   acc.push({ ...rest, images: images.map((img) => img.url) });
-    //   return acc;
-    // }, []);
+
+    return products.reduce((acc, { images, ...rest }) => {
+      acc.push({ ...rest, images: images.map((img) => img.url) });
+      return acc;
+    }, []);
   }
 
   async findOne(term: string) {
@@ -76,7 +77,7 @@ export class ProductsService {
     // const product = await this.productRepository.findOneBy({ id });
     let product: Product;
     if (isUUID(term))
-      product = await this.productRepository.findOneBy({ id: term }); // <- eager
+      product = await this.productRepository.findOneBy({ id: term });
     else {
       const queryBuilder =
         this.productRepository.createQueryBuilder('prod_alias');
@@ -86,7 +87,7 @@ export class ProductsService {
           title: term.toUpperCase(),
           slug: term.toLowerCase(),
         })
-        .leftJoinAndSelect('prod_alias.images', 'prodImages_alias') // traer las imgs
+        .leftJoinAndSelect('prod_alias.images', 'prodImages_alias')
         .getOne();
     }
 
@@ -96,28 +97,53 @@ export class ProductsService {
     return product;
   }
 
-  /* Se usa en el controller, pero con el @Transform ya no es necesaria esta logica ni la de aplanar
-  async findOnePlain(term: string) {
-    const { images = [], ...rest } = await this.findOne(term);
-    return { ...rest, images: images.map((img) => img.url) };
-  } 
-  */
-
-  // async update(id: string, updateProductDto: UpdateProductDto) {
-  //   const product = await this.productRepository.preload({
-  //     id: id,
-  //     ...updateProductDto,
-  //   });
-  //   if (!product)
-  //     throw new NotFoundException(`Product with id '${id} not found`);
-
-  //   try {
-  //     return await this.productRepository.save(product);
-  //   } catch (error) {
-  //     this.handleDBExceptions(error);
-  //   }
+  // async findOnePlain(term: string) {
+  //   const { images = [], ...rest } = await this.findOne(term);
+  //   return { ...rest, images: images.map((img) => img.url) };
   // }
+
   async update(id: string, updateProductDto: UpdateProductDto) {
+    const { images, ...rest } = updateProductDto;
+    const product = await this.productRepository.preload({
+      id,
+      ...rest,
+    });
+    if (!product)
+      throw new NotFoundException(`Product with id '${id} not found`);
+
+    // Query Runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // imgs - si vienen borra todas las imgs en DB y agregar
+      if (images) {
+        await queryRunner.manager.delete(ProductImage, { product: { id } });
+
+        product.images = images.map((img) =>
+          this.productImageRepository.create({ url: img }),
+        );
+      } else {
+        // requiere la consulta x la relacion
+        product.images = await this.productImageRepository.findBy({
+          product: { id },
+        });
+      }
+      await queryRunner.manager.save(product); // aun no impacta la db espera al commit
+      await queryRunner.commitTransaction(); // persiste si no hay errores
+      await queryRunner.release(); // elimina el queryRunner
+
+      return product;
+      // return await this.productRepository.save(product); // sun queryRunner ni relaciones
+    } catch (error) {
+      // si da error en la transaccion
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+
+      this.handleDBExceptions(error);
+    }
+  }
+  /*   async update(id: string, updateProductDto: UpdateProductDto) {
     try {
       const result = await this.productRepository
         .createQueryBuilder()
@@ -135,7 +161,7 @@ export class ProductsService {
     } catch (error) {
       this.handleDBExceptions(error);
     }
-  }
+  } */
 
   async remove(id: string) {
     const product = await this.findOne(id);
