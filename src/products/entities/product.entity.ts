@@ -1,8 +1,10 @@
+import { ProductImage } from './';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -34,7 +36,19 @@ export class Product {
   @Column('text')
   gender: string;
 
-  // Solo se llaman con el  .save()
+  @Column('text', { array: true, default: [] })
+  tags: string[];
+
+  // // Relaciones images: 1 Product puede tener Muchas Images  -  Se crea en ProductImg
+  @OneToMany(() => ProductImage, (productImage) => productImage.product, {
+    cascade: true,
+
+    // cargara las imgs con cualqueir find*: https://orkhan.gitbook.io/typeorm/docs/eager-and-lazy-relations
+    eager: true,
+  })
+  images?: ProductImage[];
+
+  // // Solo se llaman con el  .save()
   @BeforeInsert()
   checkSlugInsert() {
     if (!this.slug) this.slug = this.title;

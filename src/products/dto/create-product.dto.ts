@@ -26,7 +26,7 @@ export class CreateProductDto {
 
   @IsString()
   @IsOptional()
-  // @Matches(/^[\w-]+$/, { message: 'Slug format is incorrect' })
+  @Matches(/^[\w-]+$/, { message: 'Slug format is incorrect' })
   slug?: string;
 
   @IsInt()
@@ -38,6 +38,17 @@ export class CreateProductDto {
   @IsArray()
   sizes: string[];
 
+  @IsString({ each: true })
+  @IsArray()
+  @IsOptional()
+  tags?: string[];
+
   @IsIn(['men', 'women', 'kid', 'unisex'])
   gender: string;
+
+  // relaciones
+  @IsString({ each: true })
+  @IsArray()
+  @IsOptional()
+  images?: string[];
 }
