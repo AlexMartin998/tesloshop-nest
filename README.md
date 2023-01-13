@@ -30,6 +30,14 @@ docker compose up --build -d
 
 PgAdmin is accessible through `localhost:80`
 
+### Executing SEED
+
+```bash
+# HTTP Get request
+
+curl http://localhost:3000/api/seed
+```
+
 ### Running the app
 
 ```bash

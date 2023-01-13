@@ -9,5 +9,11 @@ import { ProductsService } from './products.service';
   providers: [ProductsService],
 
   imports: [TypeOrmModule.forFeature([Product, ProductImage])],
+  exports: [
+    ProductsService,
+
+    // // Suele ser comun para usar los Repositorios de este Module en uno externo
+    // TypeOrmModule
+  ],
 })
 export class ProductsModule {}
