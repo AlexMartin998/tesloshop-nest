@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Transform } from 'class-transformer';
 
 @Entity()
 export class Product {
@@ -40,6 +41,10 @@ export class Product {
   tags: string[];
 
   // // Relaciones images: 1 Product puede tener Muchas Images  -  Se crea en ProductImg
+  // Transforma la data antes de ser enviada como response
+  @Transform(({ value }) => {
+    return value.map((image: ProductImage) => image.url);
+  })
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {
     cascade: true,
 

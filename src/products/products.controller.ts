@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -8,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -24,13 +26,15 @@ export class ProductsController {
   }
 
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.productsService.findAll(paginationDto);
   }
 
   @Get(':term')
+  @UseInterceptors(ClassSerializerInterceptor)
   findOne(@Param('term') term: string) {
-    return this.productsService.findOnePlain(term);
+    return this.productsService.findOne(term);
   }
 
   @Patch(':id')

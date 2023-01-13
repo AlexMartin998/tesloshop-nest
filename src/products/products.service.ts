@@ -58,15 +58,17 @@ export class ProductsService {
       },
     });
 
+    return products;
+
+    // // ya no es necesaria x @Transform - @UseInterceptors(ClassSerializerInterceptor)
     // return products.map(({ images, ...rest }) => ({
     //   ...rest,
     //   images: images.map((img) => img.url),
     // }));
-
-    return products.reduce((acc, { images, ...rest }) => {
-      acc.push({ ...rest, images: images.map((img) => img.url) });
-      return acc;
-    }, []);
+    // return products.reduce((acc, { images, ...rest }) => {
+    //   acc.push({ ...rest, images: images.map((img) => img.url) });
+    //   return acc;
+    // }, []);
   }
 
   async findOne(term: string) {
@@ -74,7 +76,7 @@ export class ProductsService {
     // const product = await this.productRepository.findOneBy({ id });
     let product: Product;
     if (isUUID(term))
-      product = await this.productRepository.findOneBy({ id: term });
+      product = await this.productRepository.findOneBy({ id: term }); // <- eager
     else {
       const queryBuilder =
         this.productRepository.createQueryBuilder('prod_alias');
@@ -84,7 +86,7 @@ export class ProductsService {
           title: term.toUpperCase(),
           slug: term.toLowerCase(),
         })
-        .leftJoinAndSelect('prod_alias.images', 'prodImages_alias')
+        .leftJoinAndSelect('prod_alias.images', 'prodImages_alias') // traer las imgs
         .getOne();
     }
 
@@ -94,10 +96,12 @@ export class ProductsService {
     return product;
   }
 
+  /* Se usa en el controller, pero con el @Transform ya no es necesaria esta logica ni la de aplanar
   async findOnePlain(term: string) {
     const { images = [], ...rest } = await this.findOne(term);
     return { ...rest, images: images.map((img) => img.url) };
-  }
+  } 
+  */
 
   // async update(id: string, updateProductDto: UpdateProductDto) {
   //   const product = await this.productRepository.preload({
