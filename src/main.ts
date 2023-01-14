@@ -1,4 +1,4 @@
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { Logger, NotFoundException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -19,6 +19,11 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // envia 1 error con las properties q NO estan definidas en DTO
     }),
   );
+
+  // Si se sirve static content, ya q el middleware de servir ese contenido se ejecuta antes del notfound de nest <- PERO sobrescribe los notfound en nuestros services
+  // app.use(() => {
+  //   throw new NotFoundException();
+  // });
 
   await app.listen(PORT);
   logger.log(`App running on port ${PORT}`);
