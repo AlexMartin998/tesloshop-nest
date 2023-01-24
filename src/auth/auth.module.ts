@@ -6,10 +6,11 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
 
   imports: [
     TypeOrmModule.forFeature([User]),
@@ -20,17 +21,24 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       imports: [ConfigModule], // xq no es global en el root
       inject: [ConfigService],
 
-      useFactory: (configService: ConfigService) => {
-        return {
-          secret: configService.get<string>('jwtSecret'),
-          signOptions: { expiresIn: '2d' },
-        };
-      },
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('jwtSecret'),
+        signOptions: { expiresIn: '2d' },
+      }),
     }),
-    // JwtModule.register({
+    // JwtModule.register({  // sin async
     //   secret: '121212',
     //   signOptions: { expiresIn: '2d' },
     // }),
+  ],
+
+  exports: [
+    JwtStrategy,
+    PassportModule,
+    JwtModule,
+
+    // // Suele ser comun para usar los Repositorios de este Module en uno externo
+    // TypeOrmModule
   ],
 })
 export class AuthModule {}
