@@ -4,8 +4,9 @@ export const EnvConfiguration = () => ({
   port: process.env.PORT || 3000,
   defaultLimit: process.env.DEFAULT_LIMIT || 10,
   hostApi: process.env.HOST_API || 'http://localhost:3000/api',
+  jwtSecret: process.env.JWT_SECRET,
 
-  // // // + lo requeire x el      JOI     , xq si no viene, joi lo inserta y es una string
+  // // // (+) lo requeire x el      JOI     , xq si no viene, joi lo inserta y es una string
   // port: +process.env.PORT || 3300,
   // defaultLimit: +process.env.DEFAULT_LIMIT || 10,
 });
