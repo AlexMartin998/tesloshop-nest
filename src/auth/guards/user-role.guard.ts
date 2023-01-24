@@ -22,9 +22,11 @@ export class UserRoleGuard implements CanActivate {
       META_ROLES,
       context.getHandler(),
     );
-    // if (!validRoles) return true;
-    // if (validRoles.length === 0) return true;
+    // authentication
+    if (!validRoles) return true;
+    if (validRoles.length === 0) return true;
 
+    // authorization
     const req = context.switchToHttp().getRequest();
     const user = req.user as User;
     if (!user) throw new InternalServerErrorException('User not found');
