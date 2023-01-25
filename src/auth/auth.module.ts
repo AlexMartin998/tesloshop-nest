@@ -38,7 +38,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtModule,
 
     // // Suele ser comun para usar los Repositorios de este Module en uno externo
-    // TypeOrmModule
+    TypeOrmModule
   ],
 })
 export class AuthModule {}
