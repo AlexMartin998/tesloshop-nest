@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Headers,
+  ParseUUIDPipe,
   Post,
   SetMetadata,
   UseGuards,
@@ -20,15 +21,24 @@ import { ValidRoles } from './interfaces';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/register')
+  @Post('register')
   createUser(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
   }
 
-  @Post('/login')
+  @Post('login')
   login(@Body() loginUserDto: LoginDto) {
     return this.authService.login(loginUserDto);
   }
+
+  @Get('renew-token')
+  @Auth()
+  // checkAuthStatus(@GetUser('id', ParseUUIDPipe) id: string) {
+  checkAuthStatus(@GetUser() user: User) {
+    return this.authService.checkAuthStatus(user);
+  }
+
+  // //
 
   @Get('private')
   @UseGuards(AuthGuard())
