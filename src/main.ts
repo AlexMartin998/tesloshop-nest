@@ -1,6 +1,7 @@
-import { Logger, NotFoundException, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -19,6 +20,15 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // envia 1 error con las properties q NO estan definidas en DTO
     }),
   );
+
+  // // docs
+  const config = new DocumentBuilder()
+    .setTitle('Teslo example')
+    .setDescription('Tesloshop REST API')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document); // endpoint  /api
 
   // Si se sirve static content, ya q el middleware de servir ese contenido se ejecuta antes del notfound de nest <- PERO sobrescribe los notfound en nuestros services
   // app.use(() => {
