@@ -12,6 +12,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductImage } from './entities';
+import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -29,16 +30,18 @@ export class ProductsService {
   ) {}
 
   // TODO: crear imgs basado en el id como en SQL: https://www.udemy.com/course/nest-framework/learn/lecture/33068696#questions/18840882
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
     try {
       const { images = [], ...productDetails } = createProductDto;
 
       const product = this.productRepository.create({
-        ...createProductDto,
+        ...productDetails,
 
         images: images.map((img) =>
           this.productImageRepository.create({ url: img }),
         ),
+
+        user,
       });
 
       await this.productRepository.save(product);
@@ -102,7 +105,7 @@ export class ProductsService {
   //   return { ...rest, images: images.map((img) => img.url) };
   // }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
     const { images, ...rest } = updateProductDto;
     const product = await this.productRepository.preload({
       id,
@@ -129,6 +132,7 @@ export class ProductsService {
           product: { id },
         });
       }
+      product.user = user;
       await queryRunner.manager.save(product); // aun no impacta la db espera al commit
       await queryRunner.commitTransaction(); // persiste si no hay errores
       await queryRunner.release(); // elimina el queryRunner

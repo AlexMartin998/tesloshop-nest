@@ -1,8 +1,10 @@
+import { Product } from '../../products/entities/product.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -25,6 +27,10 @@ export class User {
 
   @Column('text', { array: true, default: ['user'] })
   authorities: string[];
+
+  // Relaciones
+  @OneToMany(() => Product, (product) => product.user, { cascade: true })
+  product: Product;
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
